@@ -8,6 +8,7 @@
 SW_VER = 20160204
 # 2016-02-03: allow switch_main_h to be float between 0.2 - 23, allow air_control to switch air down to 12 minute
 # 2016-02-04: allow ct_phase set to 0 for current-only probe
+# 2016-02-15: Unload USB serial module when no input data
 
 from time import gmtime,strftime
 import time
@@ -934,6 +935,9 @@ while 1:
             syslog.syslog("no data receive too long, exit")
             d_log.write("no data receive too long, exit\n")
             d_log.flush()
+            # posible usb error. close serial and unload usb kernel module
+            ser.close()
+            os.system("/sbin/rmmod cdc_acm")
             break
     if(x == 1):
         mqttc.publish(base_topic+"/info/device", device_type , 0, mqtt_LWT_retained)
