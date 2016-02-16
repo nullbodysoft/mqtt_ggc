@@ -12,5 +12,6 @@ start() {
 		fi
 	fi
 	cd /root/mqtt
+	/sbin/lsmod | grep -q cdc_acm || /sbin/insmod /lib/modules/3.3.8/cdc-acm.ko
 	/usr/bin/python /root/mqtt/mqtt_pub.py &
 }
