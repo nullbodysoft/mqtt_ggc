@@ -1,0 +1,23 @@
+/etc/init.d/alljoyn stop
+/etc/init.d/alljoyn disable
+/etc/init.d/usd stop
+/etc/init.d/usd disable
+/etc/init.d/avahi-daemon stop
+/etc/init.d/avahi-daemon disable
+
+opkg update
+opkg install python-paho-mqtt
+opkg install kmod-usb-acm
+
+# kill bridge and restart mcu  when reboot
+cp kill-bridge /etc/init.d/
+chmod +x /etc/init.d/kill-bridge
+/etc/init.d/kill-bridge enable
+cp mqtt-pub /etc/init.d/
+chmod +x /etc/init.d/mqtt-pub
+/etc/init.d/mqtt-pub enable
+
+chmod +x /root/mqtt/mon_mqtt_pub.sh
+
+# add /root/mqtt/mon_mqtt_pub.sh in /etc/crontab/root
+#* * * * *       /root/mqtt/mon_mqtt_pub.sh > /dev/null 2>&1

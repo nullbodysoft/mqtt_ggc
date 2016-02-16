@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2008 OpenWrt.org
+
+START=99
+start() {
+	sleep 5   # make sure boot process is done, no more console msgs
+	echo "Start mqtt publish"
+	if ! test -f /root/mqtt/MAC ; then
+		MAC=$(/sbin/ifconfig eth0 | /usr/bin/head -n 1 | sed 's/.*HWaddr//; s/://g')
+		if [ "$MAC" != "" ] ; then
+			echo $MAC > /root/mqtt/MAC
+		fi
+	fi
+	cd /root/mqtt
+	/usr/bin/python /root/mqtt/mqtt_pub.py &
+}
