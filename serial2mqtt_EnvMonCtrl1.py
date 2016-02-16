@@ -5,7 +5,7 @@
 #  periordic update  calibrate information, update calibrate on start ?
 #  send probe enable data
 
-SW_VER = 20160204
+SW_VER = 20160215
 # 2016-02-03: allow switch_main_h to be float between 0.2 - 23, allow air_control to switch air down to 12 minute
 # 2016-02-04: allow ct_phase set to 0 for current-only probe
 # 2016-02-15: Unload USB serial module when no input data
