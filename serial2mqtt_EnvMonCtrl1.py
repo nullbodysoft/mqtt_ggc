@@ -1185,7 +1185,7 @@ while 1:
                     v="%0.2f" % (float(v))
                 except:
                     i=-1
-                if i>=0 and ds_id[0:2]=="28":
+                if i>=0 and ds_id[0:2]=="28" and v > -55 and v < 125:
                     mqttc.publish("%s/temp/%d/%s" %(base_topic,i+DS_OFFSET,ds_id),v)
                     if not f_temp:
                         f_temp = open(TEMP_FILE_TMP,'w')
