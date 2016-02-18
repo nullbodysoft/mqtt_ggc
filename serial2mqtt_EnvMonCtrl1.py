@@ -5,12 +5,13 @@
 #  periordic update  calibrate information, update calibrate on start ?
 #  send probe enable data
 
-SW_VER = 20160217
+SW_VER = 20160218
 # 2016-02-03: allow switch_main_h to be float between 0.2 - 23, allow air_control to switch air down to 12 minute
 # 2016-02-04: allow ct_phase set to 0 for current-only probe
 # 2016-02-15: Unload USB serial module when no input data
 # 2016-02-15: DHT22 Reset
 # 2016-02-17: Check value from DS18B20 before publish
+# 2016-02-18: Check value from UPS before publish
 
 from time import gmtime,strftime
 import time
@@ -1243,8 +1244,9 @@ while 1:
                     ups_ = open("/tmp/ups_results.txt")
                     for ups in ups_:
                         v_ups = ups.strip(' \t\n\r').split(" ")    
-                        mqttc.publish(v_ups[0], v_ups[1] , 0)
-                        mqttc.loop(1,50)
+                        if len(v_ups)==2:
+                            mqttc.publish(v_ups[0], v_ups[1] , 0)
+                            mqttc.loop(1,50)
 
                     # get dht22
                     try:
