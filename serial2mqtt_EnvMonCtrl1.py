@@ -5,7 +5,7 @@
 #  periordic update  calibrate information, update calibrate on start ?
 #  send probe enable data
 
-SW_VER = 20160218
+SW_VER = 20160229
 # 2016-02-03: allow switch_main_h to be float between 0.2 - 23, allow air_control to switch air down to 12 minute
 # 2016-02-04: allow ct_phase set to 0 for current-only probe
 # 2016-02-15: Unload USB serial module when no input data
@@ -1249,35 +1249,37 @@ while 1:
                             mqttc.loop(1,50)
 
                     # get dht22
-                    try:
-                        dh = int(A['dh'])
-                        dht = float(A['dht'])
-                        dhh = float(A['dhh'])
-                        if dh == 1:
-                            if dht == 0 and dhh == 0 :
+                    if DHT_ENABLE:
+                        try:
+                            dh = int(A['dh'])
+                            dht = float(A['dht'])
+                            dhh = float(A['dhh'])
+                            if dh == 1:
+                                if dht == 0 and dhh == 0 :
+                                    if dht_reset_delay > 0:
+                                        dht_reset_delay = dht_reset_delay -1
+                                    else:
+                                        bridge.put("dh","0")
+                                        dht_reset_delay = 1
+                                        debug_txt = "reset dht22..."
+                                        syslog.syslog(debug_txt)
+                                else:
+                                    topic = "%s/dht22/temp" % (base_topic)
+                                    mqttc.publish(topic, ("%0.2f" % dht), 0)
+                                    topic = "%s/dht22/humidity" % (base_topic)
+                                    mqttc.publish(topic, ("%0.2f" % dhh), 0)
+                                    mattc.loop(1,4)
+                            else:
                                 if dht_reset_delay > 0:
                                     dht_reset_delay = dht_reset_delay -1
                                 else:
-                                    bridge.put("dh","0")
-                                    dht_reset_delay = 1
-                                    debug_txt = "reset dht22..."
+                                    debug_txt = "enable dht22..."
                                     syslog.syslog(debug_txt)
-                            else:
-                                topic = "%s/dht22/temp" % (base_topic)
-                                mqttc.publish(topic, ("%0.2f" % dht), 0)
-                                topic = "%s/dht22/humidity" % (base_topic)
-                                mqttc.publish(topic, ("%0.2f" % dhh), 0)
-                                mattc.loop(1,4)
-                        else:
-                            if dht_reset_delay > 0:
-                                dht_reset_delay = dht_reset_delay -1
-                            else:
-                                debug_txt = "enable dht22..."
-                                syslog.syslog(debug_txt)
-                                bridge.put("dh","1")
-                                dht_reset_delay = 1
-                    except:
-                        pass
+                                    bridge.put("dh","1")
+                                    dht_reset_delay = 1
+                        except:
+                            pass
+                    
                     # get 32u4 version
                     try:
                         ver=A["ver"]
