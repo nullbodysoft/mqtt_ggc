@@ -951,19 +951,14 @@ while 1:
                 # check if file change?
                 if TIME_CT_PHASE <> os.path.getmtime(FILE_CT_PHASE):
                     cmds.append(get_ct_phase())
-#                    need_calibrate += 1
                 if TIME_CT <> os.path.getmtime(FILE_CT):
                     cmds.append(get_ct_ical())
-#                    need_calibrate += 1
                 if TIME_V_CAL <> os.path.getmtime(FILE_V_CAL):
                     cmds.append(get_v_cal())
-#                    need_calibrate += 1
                 if TIME_V_PHASECAL <> os.path.getmtime(FILE_V_PHASECAL):
                     cmds.append(get_v_phasecal())
-#                    need_calibrate += 1
                 if TIME_V_PHASECOEF <> os.path.getmtime(FILE_V_PHASECOEF):
                     cmds.append(get_v_phasecoef())
-#                    need_calibrate += 1
                 if TIME_PROBE_EN <> os.path.getmtime(FILE_PROBE_EN):
                     cmds.append(get_probe_en())
                 if TIME_IRMS_NSAM <> os.path.getmtime(FILE_IRMS_NSAM):
@@ -1012,8 +1007,19 @@ while 1:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
             
+        if len(cmds)==0:
+            # save config to eeprom
+            if(os.path.isfile("/tmp/mega_save_eeprom"):
+                try:
+                    os.remove("/tmp/mega_save_eeprom")
+                    cmds.append('$save_config*54')
+                    syslog.syslog('send save_eeprom cmd\n')
+                except:
+                    pass
+                    
+                
         if len(cmds) > 0:
-            print "found cmds..."
+            #print "found cmds..."
             for calibrate_string in cmds:
                 if len(calibrate_string)>0:
                     ser.write(calibrate_string +'\n')
