@@ -1009,7 +1009,7 @@ while 1:
             
         if len(cmds)==0:
             # save config to eeprom
-            if(os.path.isfile("/tmp/mega_save_eeprom"):
+            if(os.path.isfile("/tmp/mega_save_eeprom")):
                 try:
                     os.remove("/tmp/mega_save_eeprom")
                     cmds.append('$save_config*54')
