@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
-VER="20160107"
+VER="20160229"
 
 import sys
 import time
@@ -21,6 +21,8 @@ mqtt_port=1883
 mqtt_timeout=15
 #mqtt_keep_status=False
 mqtt_keep_status=True
+
+LOOP_INTERVAL=15     # mcu loop interval
 
 #AVR_TEMP_OFFSET= -6 # get from '/root/mqtt/TEMP_OFFSET'  default: -6
 
@@ -119,6 +121,8 @@ def set_conf(check_time):
     global FILE_TIME
     global ICAL_UPDATE, VCAL_UPDATE, VPHASECAL_UPDATE, VPHASECOEF_UPDATE
 
+    bridge.put("li",str(LOOP_INTERVAL))
+    
     file_id=-1
     for filename in FILE_NAME:
         fn = CONF_PATH + filename
