@@ -42,7 +42,9 @@ VCAL_UPDATE=0
 VPHASECAL_UPDATE=0
 VPHASECOEF_UPDATE=0
 
+DHT_ENABLE=0
 conn_error=0
+dht_reset_delay=0
 
 def get_config_from_file(filename,defaultvalue,prefix):
     try:
@@ -103,6 +105,7 @@ def bridge_put_str(key, values, num_items, l):
         return
     if DEBUG_BRIDGE: print('bridge.put(%s,%s)' % (k,v))
     bridge.put(k,v)
+    return v
 
 def bridge_put_int(key, values, num_items):
     if (len(values)) != num_items:
@@ -115,11 +118,12 @@ def bridge_put_int(key, values, num_items):
     v = str(v)
     if DEBUG_BRIDGE: print('bridge.put(%s,%s)' % (k,v))
     bridge.put(k,v)
-
+    return int(v)
     
 def set_conf(check_time):
     global FILE_TIME
     global ICAL_UPDATE, VCAL_UPDATE, VPHASECAL_UPDATE, VPHASECOEF_UPDATE
+    global DHT_ENABLE
 
     bridge.put("li",str(LOOP_INTERVAL))
     
@@ -161,7 +165,7 @@ def set_conf(check_time):
         elif filename == 'ct_phase.txt':
             bridge_put_str('pm',items,1,6)
         elif filename == 'dht_enable.txt':
-            bridge_put_int('dh',items,1)
+            DHT_ENABLE=bridge_put_int('dh',items,1)
         elif filename == 'ow_enable.txt':
             bridge_put_int('ow',items,1)
 
@@ -366,16 +370,34 @@ while 1 :
     except:
         pass
 
-    try:
-        dh = int(A['dh'])
-        dht = float(A['dht'])
-        dhh = float(A['dhh'])
-        if dh == 1:
-            topic = "%s/dht22/temp" % (base_topic)
-            mqttc.publish(topic, ("%0.2f" % dht), 0)
-            topic = "%s/dht22/humidity" % (base_topic)
-            mqttc.publish(topic, ("%0.2f" % dhh), 0)
-    except:
-        pass
+    if DHT_ENABLE:
+        try:
+            dh = int(A['dh'])
+            dht = float(A['dht'])
+            dhh = float(A['dhh'])
+            if dh == 1:
+                if dht == 0 and dhh == 0:
+                    if dht_reset_delay > 0:
+                        dht_reset_delay = dht_reset_delay -1
+                    else:
+                        bridge.put("dh","0")
+                        dht_reset_delay = 1
+                        debug_txt = "reset dht22..."
+                        syslog.syslog(debug_txt)
+                else:
+                    topic = "%s/dht22/temp" % (base_topic)
+                    mqttc.publish(topic, ("%0.2f" % dht), 0)
+                    topic = "%s/dht22/humidity" % (base_topic)
+                    mqttc.publish(topic, ("%0.2f" % dhh), 0)
+            else:
+                if dht_reset_delay > 0:
+                    dht_reset_delay = dht_reset_delay -1
+                else:
+                    bridge.put("dh","1")
+                    dht_reset_delay = 1
+                    debug_txt = "enable dht22..."
+                    syslog.syslog(debug_txt)
+        except:
+            pass
     
     mqttc.loop(1,20)
