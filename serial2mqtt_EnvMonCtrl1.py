@@ -1316,11 +1316,11 @@ while 1:
                         if t != TIME_AIRGROUP_TEMP:
                             TIME_AIRGROUP_TEMP=t
                             f = open(FILE_AIRGROUP_TEMP,'r')
-                            i=10
-                            while i > 0:
-                                i=i-1
+                            i=0
+                            while i < 10:
+                                i=i+1
                                 buff = f.readline().strip(' \t\n\r')
-                                if buff = '':
+                                if buff == '':
                                     break
                                 agroup = buff.split(' ')
                                 if len(agroup) !=3:
@@ -1329,7 +1329,8 @@ while 1:
                                 mqttc.publish(topic, agroup[1])
                                 topic = "%s/group_temp_lpf/%s" % (base_topic,agroup[0])
                                 mqttc.publish(topic, agroup[2])
-                            mqttc.loop(1,20)
+                            if i> 0:
+                                mqttc.loop(1,20)
                             f.close()
                     except:
                         pass
