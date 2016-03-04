@@ -104,6 +104,9 @@ TIME_AIR_VLOW=0
 FILE_UPDATE=TEMP_DIR + 'have_update'
 TIME_UPDATE=0
 
+FILE_AIRGROUP_TEMP=TEMP_DIR + 'temp_group.txt'
+TIME_AIRGROUP_TEMP=0
+
 TEMP_FILE_TMP = TEMP_DIR + '.temp'
 TEMP_DATA_FILE = TEMP_DIR + 'temp_data.txt'
 AIR_FILE_TMP = TEMP_DIR + '.air'
@@ -1302,6 +1305,32 @@ while 1:
                         topic = "%s/info/mcutemp" % (base_topic)
                         m="%0.2f" % t
                         mqttc.publish(topic, m , 0)
+                        mqttc.loop(1,5)
+                    except:
+                        pass
+                
+                # send air group temp
+                if os.path.isfile(FILE_AIRGROUP_TEMP):
+                    try:
+                        t=os.path.getmtime(FILE_AIRGROUP_TEMP)
+                        if t != TIME_AIRGROUP_TEMP:
+                            TIME_AIRGROUP_TEMP=t
+                            f = open(FILE_AIRGROUP_TEMP,'r')
+                            i=10
+                            while i > 0:
+                                i=i-1
+                                buff = f.readline().strip(' \t\n\r')
+                                if buff = '':
+                                    break
+                                agroup = buff.split(' ')
+                                if len(agroup) !=3:
+                                    break
+                                topic = "%s/group_temp/%s" % (base_topic,agroup[0])
+                                mqttc.publish(topic, agroup[1])
+                                topic = "%s/group_temp_lpf/%s" % (base_topic,agroup[0])
+                                mqttc.publish(topic, agroup[2])
+                            mqttc.loop(1,20)
+                            f.close()
                     except:
                         pass
                         
